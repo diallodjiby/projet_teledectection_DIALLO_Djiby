@@ -174,3 +174,4 @@ def prepare_training_data(X_image, y_raster):
     y = y_flat[mask.flatten()]
 
     return X, y, mask
+
