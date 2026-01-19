@@ -174,4 +174,70 @@ def prepare_training_data(X_image, y_raster):
     y = y_flat[mask.flatten()]
 
     return X, y, mask
+def merge_and_save_multiband(
+    images,
+    output_path,
+    reference_raster_path,
+    nodata=None,
+    dtype=gdal.GDT_Float32
+):
+    """
+    Fusionne plusieurs images 2D en une image multibande et l'enregistre avec GDAL.
+    """
+
+    shapes = [img.shape for img in images]
+    if len(set(shapes)) != 1:
+        raise ValueError("Toutes les images doivent avoir les mêmes dimensions")
+
+    multiband_image = np.stack(images, axis=-1)
+
+    rows, cols, bands = multiband_image.shape
+
+    ref_ds = gdal.Open(reference_raster_path)
+    geotransform = ref_ds.GetGeoTransform()
+    projection = ref_ds.GetProjection()
+    ref_ds = None
+
+    driver = gdal.GetDriverByName("GTiff")
+    out_ds = driver.Create(
+        output_path,
+        cols,
+        rows,
+        bands,
+        dtype,
+        options=["COMPRESS=LZW"]
+    )
+
+    out_ds.SetGeoTransform(geotransform)
+    out_ds.SetProjection(projection)
+
+    for b in range(bands):
+        band = out_ds.GetRasterBand(b + 1)
+        band.WriteArray(multiband_image[:, :, b])
+
+        if nodata is not None:
+            band.SetNoDataValue(nodata)
+
+        band.FlushCache()
+
+    out_ds = None
+
+    print(f"✅ Image multibande créée : {output_path}")
+import pandas as pd
+
+def report_from_dict_to_df(dict_report):
+    """
+    Convertit un classification_report (output_dict=True) en DataFrame propre
+    """
+
+    report_df = pd.DataFrame.from_dict(dict_report)
+
+    try:
+        report_df = report_df.drop(['accuracy', 'macro avg', 'weighted avg'], axis=1)
+    except KeyError:
+        report_df = report_df.drop(['micro avg', 'macro avg', 'weighted avg'], axis=1)
+
+    report_df = report_df.drop(['support'], axis=0)
+
+    return report_df
 
