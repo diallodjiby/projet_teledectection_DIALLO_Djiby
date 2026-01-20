@@ -241,3 +241,28 @@ def report_from_dict_to_df(dict_report):
 
     return report_df
 
+def print_raster_info(raster_path):
+    from osgeo import gdal
+
+    ds = gdal.Open(raster_path)
+    if ds is None:
+        print("Impossible d’ouvrir le raster")
+        return
+
+    gt = ds.GetGeoTransform()
+    pixel_size_x = gt[1]
+    pixel_size_y = abs(gt[5])
+
+    band = ds.GetRasterBand(1)
+    data_type = gdal.GetDataTypeName(band.DataType)
+    nodata = band.GetNoDataValue()
+    proj = ds.GetProjection()
+
+    print("---- Informations du raster ----")
+    print("Résolution spatiale X :", pixel_size_x, "m")
+    print("Résolution spatiale Y :", pixel_size_y, "m")
+    print("Type d’encodage :", data_type)
+    print("Valeur NoData :", nodata)
+    print("Projection :", proj)
+
+    ds = None
