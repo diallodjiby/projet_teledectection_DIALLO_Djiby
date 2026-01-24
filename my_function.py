@@ -161,13 +161,13 @@ def save_ari_series(ari_array, reference_raster_path, output_path, nodata=-9999)
     rows, cols, n_dates = ari_array.shape 
 
     driver = gdal.GetDriverByName("GTiff")
-    ds_out = driver.Create(output_path, cols, rows, nb_dates, gdal.GDT_Float32,
+    ds_out = driver.Create(output_path, cols, rows, n_dates, gdal.GDT_Float32,
                            options=["COMPRESS=LZW", "PREDICTOR=2"])
 
     ds_out.SetGeoTransform(ds_ref.GetGeoTransform())
     ds_out.SetProjection(ds_ref.GetProjection())
 
-    for i in range(nb_dates):
+    for i in range(n_dates):
         band = ds_out.GetRasterBand(i + 1)
         band.WriteArray(ari_array[:, :, i])
         band.SetNoDataValue(nodata)
