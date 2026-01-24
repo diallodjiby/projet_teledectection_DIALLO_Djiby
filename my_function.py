@@ -158,7 +158,7 @@ def rasterize_vector(vector_path, ref_raster_path, output_path, attribute="strat
 
 def save_ari_series(ari_array, reference_raster_path, output_path, nodata=-9999):
     ds_ref = gdal.Open(reference_raster_path)
-    rows, cols, nb_dates = ari_array.shape
+    rows, cols, n_dates = ari_array.shape 
 
     driver = gdal.GetDriverByName("GTiff")
     ds_out = driver.Create(output_path, cols, rows, nb_dates, gdal.GDT_Float32,
