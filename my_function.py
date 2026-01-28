@@ -276,3 +276,83 @@ def predict_by_blocks(model, image_array, block_size=1000):
             classified[y:y_end, x:x_end] = predictions.reshape(block.shape[0], block.shape[1])
 
     return classified
+
+from osgeo import gdal
+import numpy as np
+import os
+
+def mask_classification_with_b08(
+    raster_classif_path,
+    raster_b08_path,
+    output_path,
+    nodata_value=0
+):
+    """
+    Applique un masque spatial basé sur la bande B08 à une carte classifiée.
+
+    Paramètres
+    ----------
+    raster_classif_path : str
+        Chemin vers la carte classifiée (uint8).
+    raster_b08_path : str
+        Chemin vers la bande B08 Sentinel-2 (utilisée comme masque spatial).
+    output_path : str
+        Chemin du raster découpé en sortie.
+    nodata_value : int, optionnel
+        Valeur NoData (par défaut 0).
+
+    Sortie
+    ------
+    Fichier raster découpé (uint8) avec NoData appliqué.
+    """
+
+    print("Carte classifiée :", raster_classif_path)
+    print("Masque B08 :", raster_b08_path)
+
+    # --- Ouverture rasters ---
+    ds_classif = gdal.Open(raster_classif_path)
+    ds_b08 = gdal.Open(raster_b08_path)
+
+    if ds_classif is None or ds_b08 is None:
+        raise RuntimeError("❌ Impossible d’ouvrir les rasters")
+
+    classif_arr = ds_classif.ReadAsArray()
+    b08_arr = ds_b08.ReadAsArray()
+
+    # Si B08 est multibande
+    if b08_arr.ndim == 3:
+        b08_arr = b08_arr[0]
+
+    # --- Création du masque ---
+    mask = b08_arr > 0
+    print("Pixels valides :", np.sum(mask))
+
+    # --- Application du masque ---
+    classif_masked = np.where(mask, classif_arr, nodata_value).astype(np.uint8)
+
+    # --- Sauvegarde ---
+    driver = gdal.GetDriverByName("GTiff")
+    ds_out = driver.Create(
+        output_path,
+        ds_classif.RasterXSize,
+        ds_classif.RasterYSize,
+        1,
+        gdal.GDT_Byte,
+        options=["COMPRESS=LZW"]
+    )
+
+    ds_out.SetGeoTransform(ds_classif.GetGeoTransform())
+    ds_out.SetProjection(ds_classif.GetProjection())
+
+    band = ds_out.GetRasterBand(1)
+    band.WriteArray(classif_masked)
+    band.SetNoDataValue(nodata_value)
+
+    # Fermeture
+    ds_out = None
+    ds_classif = None
+    ds_b08 = None
+
+    print("✅ Carte découpée créée :", output_path)
+
+    return output_path
