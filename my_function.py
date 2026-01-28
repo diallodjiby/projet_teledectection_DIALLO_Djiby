@@ -78,7 +78,7 @@ def create_ari_phenology_plot(moyennes, ecarts_types, dates, class_info, output_
     plt.savefig(output_path, dpi=150)
     plt.close()
 
-    print("✅ Graphique ARI sauvegardé :", output_path)
+    print("Graphique ARI sauvegardé :", output_path)
 
 
 # =========================================================
@@ -115,7 +115,7 @@ def analyze_feature_importance(model, feature_names, top_n=20, save_path=None):
         plt.tight_layout()
         plt.savefig(save_path, dpi=150)
         plt.close()
-        print(f"✅ Graphique d'importance sauvegardé : {save_path}")
+        print(f"Graphique d'importance sauvegardé : {save_path}")
 
     return df
 
@@ -152,7 +152,7 @@ def rasterize_vector(vector_path, ref_raster_path, output_path, attribute="strat
     vect_ds = None
     ds_ref = None
 
-    print(f"✅ Rasterisation terminée : {output_path}")
+    print(f"Rasterisation terminée : {output_path}")
     return output_path
 
 
@@ -176,7 +176,7 @@ def save_ari_series(ari_array, reference_raster_path, output_path, nodata=-9999)
     ds_out = None
     ds_ref = None
 
-    print(f"✅ Série temporelle ARI sauvegardée : {output_path}")
+    print(f"Série temporelle ARI sauvegardée : {output_path}")
 
 
 def save_multiband_raster(array, reference_raster_path, output_path, nodata=-9999):
@@ -198,7 +198,7 @@ def save_multiband_raster(array, reference_raster_path, output_path, nodata=-999
     ds_out = None
     ds_ref = None
 
-    print(f"✅ Raster multibande sauvegardé : {output_path}")
+    print(f"Raster multibande sauvegardé : {output_path}")
 
 
 def save_classification_map(predicted_array, reference_raster_path, output_path, nodata_value=0):
@@ -228,7 +228,7 @@ def save_classification_map(predicted_array, reference_raster_path, output_path,
     ds_out = None
     ds_ref = None
 
-    print(f"✅ Carte classifiée sauvegardée : {output_path}")
+    print(f"Carte classifiée sauvegardée : {output_path}")
 
 
 # =========================================================
@@ -314,7 +314,7 @@ def mask_classification_with_b08(
     ds_b08 = gdal.Open(raster_b08_path)
 
     if ds_classif is None or ds_b08 is None:
-        raise RuntimeError("❌ Impossible d’ouvrir les rasters")
+        raise RuntimeError("Impossible d’ouvrir les rasters")
 
     classif_arr = ds_classif.ReadAsArray()
     b08_arr = ds_b08.ReadAsArray()
@@ -353,6 +353,6 @@ def mask_classification_with_b08(
     ds_classif = None
     ds_b08 = None
 
-    print("✅ Carte découpée créée :", output_path)
+    print("Carte découpée créée :", output_path)
 
     return output_path
