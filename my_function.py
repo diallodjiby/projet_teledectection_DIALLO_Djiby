@@ -277,10 +277,6 @@ def predict_by_blocks(model, image_array, block_size=1000):
 
     return classified
 
-from osgeo import gdal
-import numpy as np
-import os
-
 def mask_classification_with_b08(
     raster_classif_path,
     raster_b08_path,
